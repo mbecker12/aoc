@@ -6,9 +6,6 @@ import (
 	"sort"
 	"strconv"
 	"strings"
-	// "io/ioutil"
-	// "log"
-	// "net/http"
 )
 
 type elf struct {
