@@ -208,7 +208,6 @@ func Run(input []byte, level int) int {
 	case 2:
 		visibility := findVisibility(data)
 		fmt.Printf("Max visibility score: %d\n\n", visibility)
-		// os.Exit(1)
 		return visibility
 	default:
 		fmt.Printf("Level %d not recognized\n\n", level)
