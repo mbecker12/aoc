@@ -2,6 +2,7 @@ package aoc2022
 
 import (
 	aoc2022d1 "aoc.mb/aoc2022/1"
+	aoc2022d8 "aoc.mb/aoc2022/8"
 )
 
 func Aoc(day string, level int, input []byte) int {
@@ -9,6 +10,9 @@ func Aoc(day string, level int, input []byte) int {
 	switch day {
 	case "1":
 		ret = aoc2022d1.Run(input, level)
+	case "8":
+		ret = aoc2022d8.Run(input, level)
 	}
+
 	return ret
 }

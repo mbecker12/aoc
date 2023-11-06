@@ -6,6 +6,7 @@ import (
 	"log"
 	"net/http"
 	"os"
+	"strings"
 
 	"aoc.mb/secret"
 )
@@ -96,4 +97,15 @@ func readDataFromFile(fileName string) []byte {
 		return nil
 	}
 	return data
+}
+
+func SplitByteInput(input []byte, delimiter string) []string {
+	inputStr := string(input)
+	return SplitStringInput(inputStr, delimiter)
+}
+
+func SplitStringInput(input string, delimiter string) []string {
+	groups := strings.Split(input, delimiter)
+
+	return groups
 }

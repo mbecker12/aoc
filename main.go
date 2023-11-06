@@ -3,7 +3,6 @@ package main
 import (
 	"flag"
 	"fmt"
-	"strconv"
 
 	"aoc.mb/aoc2022"
 	"aoc.mb/aocutils"
@@ -11,13 +10,14 @@ import (
 
 func main() {
 	var year string = "2022"
-	var day string = "1"
-	// var level int = 1
+	var level int
+	var day string
 
-	levelAddress := flag.String("level", "1", "AoC Level")
+	flag.IntVar(&level, "level", 1, "AoC Level")
+	flag.StringVar(&day, "day", "1", "AoC Day")
 	flag.Parse()
 
-	fmt.Println(year, day)
+	fmt.Println(year, day, level)
 
 	input := aocutils.DownloadAocInput(year, day)
 	if input != nil {
@@ -26,7 +26,6 @@ func main() {
 	fmt.Println("Downloaded Input")
 	fmt.Println()
 
-	level, _ := strconv.Atoi(*levelAddress)
 	answer := aoc2022.Aoc(day, level, input)
 
 	aocutils.SubmitAocResult(year, day, level, answer)

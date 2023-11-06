@@ -5,7 +5,8 @@ import (
 	"log"
 	"sort"
 	"strconv"
-	"strings"
+
+	"aoc.mb/aocutils"
 )
 
 type elf struct {
@@ -20,23 +21,12 @@ func (e *elf) Calories() []int {
 	return e.calories
 }
 
-func splitByteInput(input []byte, delimiter string) []string {
-	inputStr := string(input)
-	return splitStringInput(inputStr, delimiter)
-}
-
-func splitStringInput(input string, delimiter string) []string {
-	groups := strings.Split(input, delimiter)
-
-	return groups
-}
-
 func assembleData(groups []string) []elf {
 	var elves = make([]elf, len(groups))
 	fmt.Println("Initialized elves")
 	n := len(groups)
 	for i := 0; i < n; i++ {
-		group := splitStringInput(groups[i], "\n")
+		group := aocutils.SplitStringInput(groups[i], "\n")
 		var tmp = make([]int, len(group))
 		for j := 0; j < len(group); j++ {
 			if group[j] == "" {
@@ -93,7 +83,7 @@ func findTopNSum(elves []elf, n int) int {
 
 func Run(input []byte, level int) int {
 	fmt.Printf("Day 1, Level %d\n", level)
-	groups := splitByteInput(input, "\n\n")
+	groups := aocutils.SplitByteInput(input, "\n\n")
 	fmt.Println("Split into groups")
 	fmt.Println()
 
