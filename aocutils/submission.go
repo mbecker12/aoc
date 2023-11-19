@@ -58,7 +58,7 @@ func waitAfterLatestSubmission(year string, day string, level int, waitTime int)
 
 }
 
-func SubmitAocResult(year string, day string, level int, answer int) {
+func SubmitAocResult(year string, day string, level int, answer int, dryrun bool) {
 	waitTime := 300
 	if waitAfterLatestSubmission(year, day, level, waitTime) {
 		return
@@ -70,6 +70,10 @@ func SubmitAocResult(year string, day string, level int, answer int) {
 	WriteDataToFile(fileName, _answer)
 
 	fmt.Printf("Submitting answer for year %s, day %s, level %d to\n%s\n\n", year, day, level, getAocDailyUrl(year, day))
+	if dryrun {
+		fmt.Println("Skipping due to dryrun.")
+		return
+	}
 	cmd := exec.Command(
 		"python3",
 		"aocutils/post.py",

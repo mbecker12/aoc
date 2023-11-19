@@ -17,8 +17,9 @@ func getAocDailyUrl(year string, day string) string {
 	return fmt.Sprintf(BaseAocUrl+"%s/day/%s/", year, day)
 }
 
-func getDataFileName(year string, day string) string {
-	return fmt.Sprintf("aoc%s/%s/data.txt", year, day)
+func GetDataFileName(year string, day string) string {
+	path := "aoc%s/%s/data.txt"
+	return fmt.Sprintf(path, year, day)
 }
 
 func handleResponse(resp *http.Response, err error) {
@@ -32,10 +33,10 @@ func handleResponse(resp *http.Response, err error) {
 
 func DownloadAocInput(year string, day string) []byte {
 	fmt.Printf("Fetching input for year %s, day %s\n", year, day)
-	fileName := getDataFileName(year, day)
-	if fileExists(fileName) {
+	fileName := GetDataFileName(year, day)
+	if FileExists(fileName) {
 		fmt.Printf("Reading data from file %s\n", fileName)
-		return readDataFromFile(fileName)
+		return ReadDataFromFile(fileName)
 	}
 	fmt.Println("Downloading data")
 	client := &http.Client{}
@@ -57,7 +58,7 @@ func DownloadAocInput(year string, day string) []byte {
 	return body
 }
 
-func fileExists(fileName string) bool {
+func FileExists(fileName string) bool {
 	_, err := os.Stat(fileName)
 	if err == nil {
 		return true // File exists
@@ -70,7 +71,7 @@ func fileExists(fileName string) bool {
 }
 
 func WriteDaysDataToFile(year string, day string, data []byte) {
-	fileName := getDataFileName(year, day)
+	fileName := GetDataFileName(year, day)
 	WriteDataToFile(fileName, data)
 }
 
@@ -91,7 +92,7 @@ func WriteDataToFile(fileName string, data []byte) {
 
 }
 
-func readDataFromFile(fileName string) []byte {
+func ReadDataFromFile(fileName string) []byte {
 	data, err := os.ReadFile(fileName)
 	if err != nil {
 		return nil
