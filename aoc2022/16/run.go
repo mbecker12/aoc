@@ -105,10 +105,50 @@ func saveData(input []byte) gograph.Graph[string] {
 	return graph
 }
 
+func addPressure[T comparable](openedValves map[T]int, totalPressure int) int {
+	for _, v := range openedValves {
+		totalPressure += v
+	}
+	return totalPressure
+}
+
+func traverseGraph[T comparable](g gograph.Graph[T], currentVertex *gograph.Vertex[T], openedValves map[T]int, currentPressure int, timestep int, maxtime int) int {
+	if timestep == maxtime {
+		return addPressure[T](openedValves, currentPressure)
+	}
+	// currentVertex := g.GetVertexByID(currentVertexName)
+	neighbors := currentVertex.Neighbors()
+
+	maxWeight := 0
+	var bestNeighbor *gograph.Vertex[T]
+	for _, neighbor := range neighbors {
+		if int(neighbor.Weight()) > maxWeight {
+
+			for openValve, _ := range openedValves {
+				// skip if valve has already been opened
+				if openValve == neighbor.Label() {
+					continue
+				}
+			}
+			maxWeight = int(neighbor.Weight())
+			bestNeighbor = neighbor
+		}
+	}
+	// traverse to next vertex
+	openedValves[bestNeighbor.Label()] = int(bestNeighbor.Weight())
+	currentPressure = addPressure[T](openedValves, currentPressure)
+	return traverseGraph[T](g, bestNeighbor, openedValves, currentPressure, timestep+1, maxtime)
+}
+
 func Run(input []byte, level int) int {
 	fmt.Printf("Day 16, Level %d\n", level)
 	graph := saveData(input)
+	currentVertex := graph.GetVertexByID("AA")
 
+	maxtime := 30
+
+	traverseGraph[string](graph, currentVertex, openedValves, 0, 0, maxtime)
+	fmt.Println(graph)
 	switch level {
 	case 1:
 		fmt.Printf("Level %d not implemented yet\n", level)
