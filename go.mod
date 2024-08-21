@@ -1,5 +1,5 @@
 module aoc.mb
 
-go 1.21.3
+go 1.21
 
-require github.com/hmdsefi/gograph v0.4.0 // indirect
+require github.com/hmdsefi/gograph v0.4.2

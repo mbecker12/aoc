@@ -26,20 +26,31 @@ func getChallengeData(year string, day string, useSmallData bool) ([]byte, error
 	return challengeInput, nil
 }
 
+func cleanupSubmissionFiles(year, day string, level int) {
+	fmt.Println("TODO: remove old submission files, keeping the latest one for each level in the given folder for")
+	fmt.Printf("Year %s, Day %s, Level %d.", year, day, level)
+}
+
 func main() {
 	var year string = "2022"
 	var level int
 	var day string
-	var dryrun bool
-	var useSmallData bool
+	var dryrun, useSmallData, cleanupSubmissionData bool
 
 	flag.IntVar(&level, "level", 1, "AoC Level")
 	flag.StringVar(&day, "day", "1", "AoC Day")
 	flag.BoolVar(&dryrun, "dryrun", false, "Dryrun option")
-	flag.BoolVar(&useSmallData, "smalldata", false, "Toggle uising small example data if it exists in the folder")
+	flag.BoolVar(&useSmallData, "smalldata", false, "Toggle using small example data if it exists in the folder")
+	flag.BoolVar(&cleanupSubmissionData, "cleanup", false, "Toggle cleanup of old submission cache files. Will keep the latest submission file. Skips execution of the AoC problem.")
 	flag.Parse()
 
-	fmt.Println(year, day, level)
+	fmt.Println("Year", year, "\nDay", day, "\nLevel", level)
+
+	if cleanupSubmissionData {
+		fmt.Printf("Cleaning up submission data for Year %s, Day %s, Level %d. Skipping code execution.\n", year, day, level)
+		cleanupSubmissionFiles(year, day, level)
+		os.Exit(0)
+	}
 
 	challengeInput, err := getChallengeData(year, day, useSmallData)
 	if err != nil {

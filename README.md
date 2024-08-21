@@ -2,6 +2,14 @@
 
 Collection of Advent of Code solutions
 
+# How to Run
+
+To run a given task, compile the program using `go build main.go` and simply execute
+
+```bash
+./main -level <level> -day <day> [-dryrun] [-smalldata]
+```
+
 
 ## Automation Guidelines
 

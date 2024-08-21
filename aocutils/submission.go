@@ -13,8 +13,6 @@ import (
 	"strconv"
 	"strings"
 	"time"
-
-	"aoc.mb/secret"
 )
 
 func getSubmissionFileName(year string, day string, level int) string {
@@ -60,8 +58,10 @@ func waitAfterLatestSubmission(year string, day string, level int, waitTime int)
 
 func SubmitAocResult(year string, day string, level int, answer int, dryrun bool) {
 	waitTime := 300
-	if waitAfterLatestSubmission(year, day, level, waitTime) {
-		return
+	if !dryrun {
+		if waitAfterLatestSubmission(year, day, level, waitTime) {
+			return
+		}
 	}
 
 	fileName := getSubmissionFileName(year, day, level)
@@ -71,15 +71,17 @@ func SubmitAocResult(year string, day string, level int, answer int, dryrun bool
 
 	fmt.Printf("Submitting answer for year %s, day %s, level %d to\n%s\n\n", year, day, level, getAocDailyUrl(year, day))
 	if dryrun {
-		fmt.Println("Skipping due to dryrun.")
+		fmt.Println("Skipping submission due to dryrun.")
 		return
 	}
+
+	sessionToken := GetSessionToken("")
 	cmd := exec.Command(
-		"python3",
+		PythonBinPath,
 		"aocutils/post.py",
 		fmt.Sprintf("--answer=%d", answer),
 		fmt.Sprintf("--level=%d", level),
-		fmt.Sprintf("--session=%s", secret.Session),
+		fmt.Sprintf("--session=%s", sessionToken),
 		fmt.Sprintf("--year=%s", year),
 		fmt.Sprintf("--day=%s", day),
 	)
@@ -88,11 +90,13 @@ func SubmitAocResult(year string, day string, level int, answer int, dryrun bool
 	cmd.Stdout = &outbuf
 	cmd.Stderr = &errbuf
 	err := cmd.Run()
+	stdout := outbuf.String()
+	stderr := errbuf.String()
+	fmt.Println(stdout)
+	fmt.Println(stderr)
 	if err != nil {
 		panic(err)
 	}
-	stdout := outbuf.String()
-	stderr := errbuf.String()
 
 	if strings.Contains(stdout, "seem to be solving the right level") {
 		fmt.Println("You don't seem to be solving the right level")
@@ -132,7 +136,8 @@ func submitAocResultInGo(year string, day string, level int, answer int) {
 	if err != nil {
 		log.Fatalln(err)
 	}
-	req.Header.Add("Cookie", fmt.Sprintf("session=%s", secret.Session))
+	sessionToken := GetSessionToken("")
+	req.Header.Add("Cookie", fmt.Sprintf("session=%s", sessionToken))
 	req.Header.Add("User-Agent", "https://github.com/mbecker12/aoc by marvinbecker@mail.de")
 	fmt.Println(req.Method)
 	fmt.Println(req.URL)

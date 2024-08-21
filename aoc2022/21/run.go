@@ -2,7 +2,7 @@ package aoc2022
 
 import (
 	"fmt"
-	"math"
+	"os/exec"
 	"strconv"
 	"strings"
 
@@ -11,7 +11,7 @@ import (
 
 type monkey struct {
 	name     string
-	number   int
+	number   string
 	operand  string
 	ref1Name string
 	ref2Name string
@@ -19,7 +19,7 @@ type monkey struct {
 	ref2     *monkey
 }
 
-func getData(input []byte) []monkey {
+func getData(input []byte, level int) []monkey {
 	dataStrings := aocutils.SplitByteInput(input, "\n")
 	operands := "+-*/"
 	refNames := make([]string, 2)
@@ -43,17 +43,20 @@ func getData(input []byte) []monkey {
 			}
 			m = monkey{
 				name:     name,
-				number:   int(math.Inf(1)) - 1,
+				number:   "empty",
 				operand:  matchingOperand,
 				ref1Name: strings.TrimSpace(refNames[0]),
 				ref2Name: strings.TrimSpace(refNames[1]),
 			}
 		} else {
-			number, _ := strconv.Atoi(strings.TrimSpace(splitString[1]))
+			number := strings.TrimSpace(splitString[1])
 			m = monkey{
 				name:   name,
 				number: number,
 			}
+		}
+		if m.name == "humn" && level == 2 {
+			m.number = "x"
 		}
 		allMonkeys[i] = m
 	}
@@ -80,31 +83,48 @@ func (m *monkey) arithmetic(depth int) {
 	/*
 		Update m's number according to its references.
 	*/
-	fmt.Printf("Name: %s, Recursion depth: %d, ref1: %s, ref2: %s\n", m.name, depth, m.ref1Name, m.ref2Name)
-	fmt.Println("Ref1:")
-	fmt.Println(m.ref1)
 	if m.ref1.ref1 != nil {
 		m.ref1.arithmetic(depth + 1)
 	}
 	if m.ref2.ref1 != nil {
 		m.ref2.arithmetic(depth + 1)
 	}
-	switch m.operand {
-	case "+":
-		m.number = m.ref1.number + m.ref2.number
-	case "-":
-		m.number = m.ref1.number - m.ref2.number
-	case "*":
-		m.number = m.ref1.number * m.ref2.number
-	case "/":
-		m.number = m.ref1.number / m.ref2.number
+	m.number = "(" + m.ref1.number + m.operand + m.ref2.number + ")"
+}
+
+func SympySolve(result1, result2 string) string {
+	cmd := exec.Command(
+		aocutils.PythonBinPath,
+		"/home/marvin/projects/aoc/aoc2022/21/solve.py",
+		fmt.Sprintf("%s", result1),
+		fmt.Sprintf("%s", result2),
+	)
+
+	var outbuf, errbuf strings.Builder
+	cmd.Stdout = &outbuf
+	cmd.Stderr = &errbuf
+	err := cmd.Run()
+	stderr := errbuf.String()
+	stdout := outbuf.String()
+	if err != nil {
+		fmt.Println(stderr)
+		fmt.Println("err:", err)
+		panic(err)
 	}
+	return stdout
+}
+
+func convertSympyResult(sympySolution string) int {
+	sympySolutiontrimmed := strings.TrimSpace(sympySolution)
+	result, _ := strconv.Atoi(sympySolutiontrimmed)
+	return result
 }
 
 func Run(input []byte, level int) int {
 	fmt.Printf("Day 21, Level %d\n", level)
-	allMonkeys := getData(input)
+	allMonkeys := getData(input, level)
 	allRefMonkeys := make([]monkey, len(allMonkeys))
+	var result string
 
 	// Big learning:
 	// It's important to not iterate using 'range',
@@ -116,18 +136,47 @@ func Run(input []byte, level int) int {
 
 	switch level {
 	case 1:
-		var result int
 		for i := 0; i < len(allRefMonkeys); i++ {
 			if allRefMonkeys[i].name == "root" {
 				allRefMonkeys[i].arithmetic(0)
 				result = allRefMonkeys[i].number
+				break
 			}
 		}
-		fmt.Printf("Root monkey contains result %d.\n\n", result)
-		return result
+		sympySolution := SympySolve(result, "level1")
+		resultLevel1 := convertSympyResult(sympySolution)
+		fmt.Printf("Root monkey contains result %d.\n\n", resultLevel1)
+		return 1
 	case 2:
-		fmt.Printf("Level %d not implemented yet.\n\n", level)
-		return -1
+		var result1, result2 string
+		for i := 0; i < len(allRefMonkeys); i++ {
+			if allRefMonkeys[i].name == "root" {
+				ref1Name := allRefMonkeys[i].ref1.name
+				ref2Name := allRefMonkeys[i].ref2.name
+
+				for j := 0; j < len(allRefMonkeys); j++ {
+					if allRefMonkeys[j].name == ref1Name {
+						allRefMonkeys[j].arithmetic(0)
+						result1 = allRefMonkeys[j].number
+						break
+					}
+				}
+				for j := 0; j < len(allRefMonkeys); j++ {
+					if allRefMonkeys[j].name == ref2Name {
+						allRefMonkeys[j].arithmetic(0)
+						result2 = allRefMonkeys[j].number
+						break
+					}
+				}
+				break
+			}
+		}
+		sympySolution := SympySolve(result1, result2)
+		resultLevel2 := convertSympyResult(sympySolution)
+
+		fmt.Println("'humn' should take on the value", resultLevel2)
+
+		return resultLevel2
 	default:
 		fmt.Printf("Level %d not recognized\n\n", level)
 		return -1

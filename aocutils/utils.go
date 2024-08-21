@@ -7,10 +7,10 @@ import (
 	"net/http"
 	"os"
 	"strings"
-
-	"aoc.mb/secret"
+	// "aoc.mb/secret"
 )
 
+var PythonBinPath = "/home/marvin/virtualenv/aoc/bin/python"
 var BaseAocUrl = "https://adventofcode.com/"
 
 func getAocDailyUrl(year string, day string) string {
@@ -23,11 +23,11 @@ func GetDataFileName(year string, day string) string {
 }
 
 func handleResponse(resp *http.Response, err error) {
+	if resp == nil || err != nil {
+		log.Fatalln(err)
+	}
 	if resp.StatusCode < 200 || resp.StatusCode >= 300 {
 		log.Fatalln(resp)
-	}
-	if err != nil {
-		log.Fatalln(err)
 	}
 }
 
@@ -42,9 +42,10 @@ func DownloadAocInput(year string, day string) []byte {
 	client := &http.Client{}
 	url := getAocDailyUrl(year, day) + "input"
 	req, _ := http.NewRequest("GET", url, nil)
-	req.Header.Set("Cookie", fmt.Sprintf("session=%s", secret.Session))
-	req.Header.Set("User-Agent", "https://github.com/mbecker12/aoc by marvinbecker@mail.de")
+	sessionToken := GetSessionToken("")
 
+	req.Header.Set("Cookie", fmt.Sprintf("session=%s", sessionToken))
+	req.Header.Set("User-Agent", "https://github.com/mbecker12/aoc by marvinbecker@mail.de")
 	resp, err := client.Do(req)
 	handleResponse(resp, err)
 	defer resp.Body.Close()
@@ -56,6 +57,18 @@ func DownloadAocInput(year string, day string) []byte {
 	fmt.Println("Input fetched successfully")
 	fmt.Println("")
 	return body
+}
+
+func GetSessionToken(filename string) string {
+	tokenFile := ""
+	if filename == "" {
+		tokenFile = ".config/aoc/token"
+		homeDir, _ := os.UserHomeDir()
+		tokenFile = homeDir + "/" + tokenFile
+	}
+	sessionToken := ReadDataFromFile(tokenFile)
+	sessionTokenString := strings.TrimSpace(string(sessionToken))
+	return sessionTokenString
 }
 
 func FileExists(fileName string) bool {

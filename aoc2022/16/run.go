@@ -142,22 +142,23 @@ func traverseGraph[T comparable](g gograph.Graph[T], currentVertex *gograph.Vert
 
 func Run(input []byte, level int) int {
 	fmt.Printf("Day 16, Level %d\n", level)
-	graph := saveData(input)
-	currentVertex := graph.GetVertexByID("AA")
+	// graph := saveData(input)
+	// currentVertex := graph.GetVertexByID("AA")
 
-	maxtime := 30
+	// maxtime := 30
 
-	traverseGraph[string](graph, currentVertex, openedValves, 0, 0, maxtime)
-	fmt.Println(graph)
-	switch level {
-	case 1:
-		fmt.Printf("Level %d not implemented yet\n", level)
-		return -1
-	case 2:
-		fmt.Printf("Level %d not implemented yet\n", level)
-		return -1
-	default:
-		fmt.Printf("Level %d not recognized\n\n", level)
-		return -1
-	}
+	// traverseGraph[string](graph, currentVertex, openedValves, 0, 0, maxtime)
+	// fmt.Println(graph)
+	// switch level {
+	// case 1:
+	// 	fmt.Printf("Level %d not implemented yet\n", level)
+	// 	return -1
+	// case 2:
+	// 	fmt.Printf("Level %d not implemented yet\n", level)
+	// 	return -1
+	// default:
+	// 	fmt.Printf("Level %d not recognized\n\n", level)
+	// 	return -1
+	// }
+	return -1
 }
