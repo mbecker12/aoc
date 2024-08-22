@@ -6,12 +6,25 @@ import (
 	"log"
 	"net/http"
 	"os"
+	"os/exec"
 	"strings"
 	// "aoc.mb/secret"
 )
 
 var PythonBinPath = "/home/marvin/virtualenv/aoc/bin/python"
 var BaseAocUrl = "https://adventofcode.com/"
+
+func GetBasePath() string {
+	cmdOut, err := exec.Command("git", "rev-parse", "--show-toplevel").Output()
+	if err != nil {
+		fmt.Printf(`Error on getting the go-kit base path: %s - %s\n`, err.Error(), string(cmdOut))
+		os.Exit(-1)
+		return ""
+	}
+	path := string(cmdOut)
+	path = strings.TrimSpace(path) + "/"
+	return path
+}
 
 func getAocDailyUrl(year string, day string) string {
 	return fmt.Sprintf(BaseAocUrl+"%s/day/%s/", year, day)
@@ -33,7 +46,7 @@ func handleResponse(resp *http.Response, err error) {
 
 func DownloadAocInput(year string, day string) []byte {
 	fmt.Printf("Fetching input for year %s, day %s\n", year, day)
-	fileName := GetDataFileName(year, day)
+	fileName := GetBasePath() + GetDataFileName(year, day)
 	if FileExists(fileName) {
 		fmt.Printf("Reading data from file %s\n", fileName)
 		return ReadDataFromFile(fileName)

@@ -7,13 +7,14 @@ import (
 	"strings"
 
 	"aoc.mb/aoc2022"
+	"aoc.mb/aoc2023"
 	"aoc.mb/aocutils"
 )
 
 func getChallengeData(year string, day string, useSmallData bool) ([]byte, error) {
 	var challengeInput []byte
 	if useSmallData {
-		filename := aocutils.GetDataFileName(year, day)
+		filename := aocutils.GetBasePath() + aocutils.GetDataFileName(year, day)
 		filename = strings.Replace(filename, "data", "smalldata", 1)
 		if !aocutils.FileExists(filename) {
 			fmt.Printf("File %s does not exist\n", filename)
@@ -32,13 +33,14 @@ func cleanupSubmissionFiles(year, day string, level int) {
 }
 
 func main() {
-	var year string = "2022"
+	var year string
 	var level int
 	var day string
 	var dryrun, useSmallData, cleanupSubmissionData bool
 
 	flag.IntVar(&level, "level", 1, "AoC Level")
 	flag.StringVar(&day, "day", "1", "AoC Day")
+	flag.StringVar(&year, "year", "2022", "AoC Year")
 	flag.BoolVar(&dryrun, "dryrun", false, "Dryrun option")
 	flag.BoolVar(&useSmallData, "smalldata", false, "Toggle using small example data if it exists in the folder")
 	flag.BoolVar(&cleanupSubmissionData, "cleanup", false, "Toggle cleanup of old submission cache files. Will keep the latest submission file. Skips execution of the AoC problem.")
@@ -57,13 +59,19 @@ func main() {
 		fmt.Println("Error detected while loading data.")
 		os.Exit(-1)
 	}
-	if challengeInput != nil {
+	if challengeInput != nil && !useSmallData {
 		aocutils.WriteDaysDataToFile(year, day, challengeInput)
 	}
 	fmt.Println("Downloaded Input")
 	fmt.Println()
 
-	answer := aoc2022.Aoc(day, level, challengeInput)
+	var answer int
+	switch year {
+	case "2022":
+		answer = aoc2022.Aoc(day, level, challengeInput)
+	case "2023":
+		answer = aoc2023.Aoc(day, level, challengeInput)
+	}
 
 	aocutils.SubmitAocResult(year, day, level, answer, dryrun)
 }

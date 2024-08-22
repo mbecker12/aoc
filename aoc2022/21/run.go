@@ -9,6 +9,8 @@ import (
 	"aoc.mb/aocutils"
 )
 
+var GroundLevel = 1
+
 type monkey struct {
 	name     string
 	number   string
