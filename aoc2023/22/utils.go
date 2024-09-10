@@ -30,6 +30,16 @@ func NewCube(x, y, z int) Cube {
 	}
 }
 
+func (c Cube) GetX() int {
+	return c.x
+}
+func (c Cube) GetY() int {
+	return c.y
+}
+func (c Cube) GetZ() int {
+	return c.z
+}
+
 func NewBrick(name string, front, back Cube, canAdvance bool) Brick {
 	brick := Brick{
 		name:       name,
@@ -58,6 +68,14 @@ func (b *Brick) calcLen() {
 	b.xlen = Abs(b.front.x - b.back.x)
 	b.ylen = Abs(b.front.y - b.back.y)
 	b.zlen = Abs(b.front.z - b.back.z)
+}
+
+func (b *Brick) GetFront() Cube {
+	return b.front
+}
+
+func (b *Brick) GetBack() Cube {
+	return b.back
 }
 
 func (b *Brick) StopAdvance() {

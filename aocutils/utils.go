@@ -47,6 +47,7 @@ func handleResponse(resp *http.Response, err error) {
 func DownloadAocInput(year string, day string) []byte {
 	fmt.Printf("Fetching input for year %s, day %s\n", year, day)
 	fileName := GetBasePath() + GetDataFileName(year, day)
+	fmt.Println(fileName)
 	if FileExists(fileName) {
 		fmt.Printf("Reading data from file %s\n", fileName)
 		return ReadDataFromFile(fileName)

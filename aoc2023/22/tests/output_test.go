@@ -10,6 +10,8 @@ import (
 	"aoc.mb/aocutils"
 )
 
+const Caching = false
+
 func getChallengeData(year string, day string, useSmallData bool) ([]byte, error) {
 	var challengeInput []byte
 	if useSmallData {
@@ -44,7 +46,6 @@ func TestFallingBricksLevel1(t *testing.T) {
 	level := 1
 	fmt.Printf("Day 22, Level %d\n", level)
 	allBricks := aoc2023.GetData(challengeInput, level)
-
 	filename := aocutils.GetDataFileName(year, day)
 	filename = strings.Replace(filename, "data", "endcoords", 1)
 	filename = aocutils.GetBasePath() + filename
@@ -52,11 +53,12 @@ func TestFallingBricksLevel1(t *testing.T) {
 	finalBricks := aoc2023.GetData(groundTruthData, level)
 
 	maxtime := 10
-	allBricks = aoc2023.TimeLoop(allBricks, maxtime, false)
 
+	allBricks = aoc2023.TimeLoop(allBricks, maxtime, false)
 	for i, b := range allBricks {
 		b.StopAdvance()
-		if b != finalBricks[i] {
+		if b.GetFront() != finalBricks[i].GetFront() ||
+			b.GetBack() != finalBricks[i].GetBack() {
 			fmt.Println("got     ", b)
 			fmt.Println("expected", finalBricks[i])
 			t.Errorf("Brick %d differs from ground truth.", i)
@@ -121,6 +123,11 @@ func TestTouchingBricks(t *testing.T) {
 	isTouching = brick1.IsBelow(&brick2)
 	if !isTouching {
 		t.Fail()
+		fmt.Println()
+		fmt.Println(brick1.GetFront().GetZ() - brick2.GetFront().GetZ())
+		fmt.Println(brick1.GetFront().GetZ() - brick2.GetBack().GetZ())
+		fmt.Println(brick1.GetBack())
+		fmt.Println(brick2.GetBack())
 		fmt.Println(brick1)
 		fmt.Println(brick2)
 		fmt.Println()
@@ -133,5 +140,143 @@ func TestTouchingBricks(t *testing.T) {
 		fmt.Println(brick1)
 		fmt.Println(brick2)
 		fmt.Println()
+	}
+
+	brick1, brick2 = constructTwoBricks(0, 1, 1, 0, 1, 2, 0, 0, 3, 0, 1, 3)
+	isTouching = brick1.IsBelow(&brick2)
+	if !isTouching {
+		t.Fail()
+		fmt.Println()
+		fmt.Println(brick1.GetFront().GetZ() - brick2.GetFront().GetZ())
+		fmt.Println(brick1.GetFront().GetZ() - brick2.GetBack().GetZ())
+		fmt.Println(brick1.GetBack())
+		fmt.Println(brick2.GetBack())
+		fmt.Println(brick1)
+		fmt.Println(brick2)
+		fmt.Println()
+	}
+
+}
+
+func TestNonTouchingBricks(t *testing.T) {
+	var brick1, brick2 aoc2023.Brick
+	var isTouching bool
+
+	brick1, brick2 = constructTwoBricks(0, 0, 1, 0, 1, 1, 0, 0, 3, 0, 0, 3)
+	isTouching = brick1.IsBelow(&brick2)
+	if isTouching {
+		t.Fail()
+		fmt.Println(brick1)
+		fmt.Println(brick2)
+		fmt.Println()
+	}
+	isTouching = brick2.IsAbove(&brick1)
+	if isTouching {
+		t.Fail()
+		fmt.Println(brick1)
+		fmt.Println(brick2)
+		fmt.Println()
+	}
+
+	brick1, brick2 = constructTwoBricks(1, 0, 1, 1, 2, 1, 3, 5, 2, 3, 6, 2)
+	isTouching = brick1.IsBelow(&brick2)
+	if isTouching {
+		t.Fail()
+		fmt.Println(brick1)
+		fmt.Println(brick2)
+		fmt.Println()
+	}
+}
+
+func TestDisintegrableBricks(t *testing.T) {
+	year := "2023"
+	day := "22"
+	level := 1
+	filename := aocutils.GetDataFileName(year, day)
+	filename = strings.Replace(filename, "data", "endcoords", 1)
+	filename = aocutils.GetBasePath() + filename
+	groundTruthData := aocutils.ReadDataFromFile(filename)
+
+	finalBricks := aoc2023.GetData(groundTruthData, level)
+	num := aoc2023.CountDisintegrableBricks(finalBricks)
+	if num != 5 {
+		t.Fail()
+	}
+}
+
+func TestDisintegrableBricksEdgeCase(t *testing.T) {
+	// https://www.reddit.com/r/adventofcode/comments/18oboe8/comment/kego8pr/?utm_source=share&utm_medium=web3x&utm_name=web3xcss&utm_term=1&utm_content=share_button
+	year := "2023"
+	day := "22"
+	level := 1
+	filename := aocutils.GetDataFileName(year, day)
+	filename = strings.Replace(filename, "data", "edgecase", 1)
+	filename = aocutils.GetBasePath() + filename
+	groundTruthData := aocutils.ReadDataFromFile(filename)
+
+	finalBricks := aoc2023.GetData(groundTruthData, level)
+	num := aoc2023.CountDisintegrableBricks(finalBricks)
+	if num != 3 {
+		fmt.Println(num)
+		t.Fail()
+	}
+}
+
+func TestDisintegrableBricksEdgeCase2(t *testing.T) {
+	// https://www.reddit.com/r/adventofcode/comments/18oboe8/comment/kegwjx2/?utm_source=share&utm_medium=web3x&utm_name=web3xcss&utm_term=1&utm_content=share_button
+	year := "2023"
+	day := "22"
+	level := 1
+	filename := aocutils.GetDataFileName(year, day)
+	filename = strings.Replace(filename, "data", "edgecase2", 1)
+	filename = aocutils.GetBasePath() + filename
+	groundTruthData := aocutils.ReadDataFromFile(filename)
+
+	initialBricks := aoc2023.GetData(groundTruthData, level)
+
+	finalBricks := aoc2023.TimeLoop(initialBricks, 5, false)
+	for i, b := range initialBricks {
+		b.StopAdvance()
+		if b.GetFront() != finalBricks[i].GetFront() ||
+			b.GetBack() != finalBricks[i].GetBack() {
+			fmt.Println("got     ", b)
+			fmt.Println("expected", finalBricks[i])
+			t.Errorf("Brick %d differs from ground truth.", i)
+		}
+	}
+
+	num := aoc2023.CountDisintegrableBricks(finalBricks)
+	if num != 2 {
+		fmt.Println(num)
+		t.Fail()
+	}
+}
+
+func TestChainReaction(t *testing.T) {
+	year := "2023"
+	day := "22"
+	challengeInput, err := getChallengeData(year, day, true)
+	if err != nil {
+		fmt.Println("Error detected while loading data.")
+		os.Exit(-1)
+	}
+	if challengeInput != nil {
+		aocutils.WriteDaysDataToFile(year, day, challengeInput)
+	}
+	fmt.Println("Downloaded Input")
+	fmt.Println()
+
+	level := 1
+	fmt.Printf("Day 22, Level %d\n", level)
+	allBricks := aoc2023.GetData(challengeInput, level)
+
+	maxtime := 10
+
+	allBricks = aoc2023.TimeLoop(allBricks, maxtime, false)
+
+	supportingBricks := aoc2023.GatherSupportedBricks(allBricks)
+	num := aoc2023.CountChainReaction(nil, supportingBricks, 0)
+	if num != 7 {
+		t.Fail()
 	}
 }
