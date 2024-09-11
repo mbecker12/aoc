@@ -12,6 +12,7 @@ import (
 type Valve struct {
 	name     string
 	flowrate int
+	isOpen   bool
 	tunnels  []string
 }
 
@@ -26,6 +27,7 @@ func extractValve(line string, r *regexp.Regexp) Valve {
 	var matches []string
 	var valvename string
 	var flowrate int
+	var isOpen bool = false
 	var tunnel1 string
 	var tunnel2 string
 	var tunnel3 string
@@ -72,6 +74,7 @@ func extractValve(line string, r *regexp.Regexp) Valve {
 	return Valve{
 		valvename,
 		flowrate,
+		isOpen,
 		tunnels,
 	}
 
@@ -108,4 +111,15 @@ func saveData(input []byte) gograph.Graph[string] {
 		}
 	}
 	return graph
+}
+
+func mapVertexToIndex(graph gograph.Graph[string]) (map[string]int, map[int]string) {
+	vertices := graph.GetAllVertices()
+	dictLabelToIndex := make(map[string]int)
+	dictIndexToLabel := make(map[int]string)
+	for i, vertex := range vertices {
+		dictLabelToIndex[vertex.Label()] = i
+		dictIndexToLabel[i] = vertex.Label()
+	}
+	return dictLabelToIndex, dictIndexToLabel
 }

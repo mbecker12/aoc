@@ -185,7 +185,7 @@ func CountDisintegrableBricks(bricks []Brick) int {
 
 	supportedBy := make(map[Brick][]Brick)            // <brick-id> : list of bricks supporting <brick-id>
 	doubleSupportingBricks := mapset.NewSet[string]() // set of bricks that are at least doubly supporting
-	uniqueSupportingBricks := mapset.NewSet[string]() // set of Bricks that are the lone supporting bricks to some
+	uniqueSupportingBricks := mapset.NewSet[string]() // set of bricks that are the lone supporting bricks to some
 	for _, b := range bricks {                        // init map; init each <brick-id> with empty list of supporters
 		supportedBy[b] = []Brick{}
 	}
@@ -224,7 +224,8 @@ func CountDisintegrableBricks(bricks []Brick) int {
 func GatherSupportedBricks(bricks []Brick) map[Brick][]Brick {
 	// TODO
 	// Gather which bricks are supported by a given brick
-	supporting := make(map[Brick][]Brick) // <brick-id> : list of bricks that <brick-id> is supporting
+	supporting := make(map[Brick][]Brick)  // <brick-id> : list of bricks that <brick-id> is supporting
+	supportedBy := make(map[Brick][]Brick) // <brick-id> : list of bricks supporting <brick-id>
 
 	for _, b := range bricks { // init map; init each <brick-id> with empty list of supporters
 		supporting[b] = []Brick{}
@@ -238,27 +239,31 @@ func GatherSupportedBricks(bricks []Brick) map[Brick][]Brick {
 			if c.IsBelow(&c) {
 				supporting[c] = append(supporting[c], b)
 			}
+			if c.IsAbove(&b) {
+				supportedBy[c] = append(supportedBy[c], b)
+			}
 		}
 	}
 	return supporting
 }
 
-func CountChainReaction(brickPtr *Brick, supporting map[Brick][]Brick, counter int) int {
-	ctr := 0
-	if brickPtr != nil {
-		counter += len(supporting[*brickPtr])
-		for _, b := range supporting[*brickPtr] {
-			counter += CountChainReaction(&b, supporting, counter)
-		}
-	}
-	for _, v := range supporting {
-		ctr += len(v)
-		for _, b := range v {
-			ctr += CountChainReaction(b, supporting, 0)
-		}
-	}
-	return ctr
-}
+// func CountChainReaction(brickPtr *Brick, supporting map[Brick][]Brick, counter int) int {
+// TODO
+// 	ctr := 0
+// 	if brickPtr != nil {
+// 		counter += len(supporting[*brickPtr])
+// 		for _, b := range supporting[*brickPtr] {
+// 			counter += CountChainReaction(&b, supporting, counter)
+// 		}
+// 	}
+// 	for _, v := range supporting {
+// 		ctr += len(v)
+// 		for _, b := range v {
+// 			ctr += CountChainReaction(b, supporting, 0)
+// 		}
+// 	}
+// 	return ctr
+// }
 
 func prettyPrintSet(s mapset.Set[string]) {
 	for x := range s.Iter() {
